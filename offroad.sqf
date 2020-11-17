@@ -39,36 +39,33 @@ if (hasInterface) then //check if running machine == player
 	] call CBA_fnc_addSetting;
 	//----------------------------CBA SETTINGS Init--------------END
 
-	_enableCamShake = false;
+	private _enableCamShake = false;
+	private _i = 0;
+	private _isoffroad = false;
 	//LOOP START
 	while {!_kill} do
 	{
 		_kill = missionNamespace getVariable ["killOffroad",false]; 
 		_skip = missionNamespace getVariable ["skipOffroad",false]; 
 		if (!_skip) then {
-			
-			if ( (vehicle player) isKindOf "car" ) then
-			{
-				_isoffroad = (!(isOnRoad (vehicle player)) && !((surfaceType getpos player) in _surfacearray) && (vehicle player != player) &&((speed (vehicle player) >= 3) OR (speed (vehicle player) < -3)) && (vehicle player) isKindOf "car" );
-		//		waituntil { //TODO: suspends complete skript in loop with no timeout till condition is met.
-		//			
-		//		};
-				if (_isoffroad) then {
-					_enableCamShake = true;
-					_camshakepower = 1 * 0.15 * speed (vehicle player);
-					_camshakefreq = 1.5 * speed (vehicle player) / 7.5;
-					addCamShake [_camshakepower, 0.5, _camshakefreq];					
-				}
-			};
-		};
-		if (_enableCamShake) then {
-			hint "off road";
-			enableCamShake true;
+			_isoffroad = ((vehicle player) isKindOf "car" && !(isOnRoad (vehicle player)) && !((surfaceType getpos player) in _surfacearray) && (vehicle player != player) &&((speed (vehicle player) >= 3) OR (speed (vehicle player) < -3)) && (vehicle player) isKindOf "car" );
+			if (_isoffroad) then {
+				_enableCamShake = true;
+				_camshakepower = 1 * 0.15 * speed (vehicle player);
+				_camshakefreq = 1.5 * speed (vehicle player) / 7.5;
+				enableCamShake true;	
+			//	addCamShake [_camshakepower, 8, _camshakefreq];	
+				addCamShake [5, 3, 10];	
+				hint ("off road: " + str _camshakepower + "|" + str _camshakefreq);			
+			} else {
+				resetCamShake;
+				hint "on road";
+			}
 		} else {
 			enableCamShake false; //TODO does this conflict with other wobble mods?
-			hint "on road";
 		};
-		sleep 0.5;
+		_i = _i + 1;
+		sleep 2;
 	}; //LOOP END
 };
 
