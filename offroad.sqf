@@ -67,12 +67,10 @@ if (hasInterface) then //check if running machine == player
 	{
 		_kill = missionNamespace getVariable ["killOffroad",false]; 
 		_skip = !offroad_enable;
-		
-
-		
+				
 		if (!_skip) then {
 			//_isoffroad = ((vehicle player) isKindOf "car" && !(isOnRoad (vehicle player)) && !((surfaceType getpos player) in _surfacearray) && (vehicle player != player) &&((speed (vehicle player) >= 3) OR (speed (vehicle player) < -3)) && (vehicle player) isKindOf "car" );
-			_isoffroad = !isOnRoad player;
+			_isoffroad = (vehicle player) isKindOf "car" && !isOnRoad player;
 			if (_isoffroad) then {
 				_enableCamShake = true;
 				_camshakepower = 1 * 0.15 * speed (vehicle player);
