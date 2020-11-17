@@ -5,11 +5,22 @@ edited by ir0nsight
 /**
 	following code is local, needs to be run clientside.
  */
-if (hasInterface) then
-{
+if (hasInterface) then //check if running machine == player
+{	//NOTE: only running on client from here 
+	//---------------------check for already running instances------start
+	private allowRun = player getVariable ["offRoadRunning",false];
+	if (!allowRun) exitWith { //only continue if skript isnt already running
+		debugLog "offroadSkript already running.";
+	};
+	player setVariable ["offRoadRunning",true,false]; //prevent other instances from intialising
+	//---------------------check for already running instances------end
+
+	//params to run loop with:
 	_surfacearray = ["#SurfRoadDirt","#SurfRoadConcrete","#SurfRoadTarmac","#concrete","#dirtrunway","#road","#road_exp","#concrete_exp","#GdtConcrete","#GdtSoil","#GdtConcrete","#GdtConcrete","#GdtDirt","concrete_out","concrete_inside","#concrete_in_exp","#concrete_hall_exp","#GdtGrassShort","#GdtAsphalt","#UTCONCRETE "];
-	private _kill = missionNamespace getVariable ["killOffroad",false];
-	private _skip = false;
+	private _kill = false; //create breakout var
+	private _skip = false; //create ignore var. 
+	
+	//LOOP START
 	while {!_kill} do
 	{
 		_kill = missionNamespace getVariable ["killOffroad",false]; 
@@ -28,7 +39,7 @@ if (hasInterface) then
 			};
 		};
 		sleep 2;
-	};
+	}; //LOOP END
 };
 
 
