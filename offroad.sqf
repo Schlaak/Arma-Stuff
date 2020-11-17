@@ -25,7 +25,7 @@ if (hasInterface) then //check if running machine == player
 	private _skip = false; //create ignore var. 
 	
 	//----------------------------CBA SETTINGS Init--------------START
-	[ //cba settings params
+	[ //cba settings ENABLE ALL
 		"offroad_enable", //display name
 		"CHECKBOX", //GUI type
 		"enable offroad camera shake script", //tooltip
@@ -34,14 +34,14 @@ if (hasInterface) then //check if running machine == player
 		true, 	//isglobal (same setting for everyone)
 		{
 			if (!isNil "offroad_debug" && offroad_debug ) then {
-				hint ("cba setting changed to " + str (missionNamespace getVariable ["skipOffroad","undefined"]));
+				hint ("offroad_enable changed to " + str _this);
 			}
 			
 		}, //execute on change
 		false //requires restart
 	] call CBA_fnc_addSetting;
 
-		[ //cba settings params
+	[ //cba setting DEBUG MODE
 		"offroad_debug", //display name
 		"CHECKBOX", //GUI type
 		"enable offroad debug mode", //tooltip
@@ -49,8 +49,24 @@ if (hasInterface) then //check if running machine == player
 		true,	//default value
 		true, 	//isglobal (same setting for everyone)
 		{
-			missionNamespace setVariable ["skipOffroad",(!_this),false]; //update variable on player
-			hint ("cba setting changed to " + str (missionNamespace getVariable ["skipOffroad","undefined"]));
+			if (!isNil "offroad_debug" && offroad_debug ) then {
+				hint ("offroad_enable changed to " + str _this);
+			}
+		}, //execute on change
+		false //requires restart
+	] call CBA_fnc_addSetting;
+
+	[ //cba setting WOBBLE STRENGTH
+		"offroad_wobble", //display name
+		"SLIDER", //GUI type
+		"camera shake strength", //tooltip
+		"offroad script", //category
+		[1,100,50,1],	//default value
+		true, 	//isglobal (same setting for everyone)
+		{
+			if (!isNil "offroad_debug" && offroad_debug ) then {
+				hint ("offroad_enable changed to " + str _this);
+			}
 		}, //execute on change
 		false //requires restart
 	] call CBA_fnc_addSetting;
@@ -73,13 +89,15 @@ if (hasInterface) then //check if running machine == player
 			_isoffroad = (vehicle player) isKindOf "car" && !isOnRoad player;
 			if (_isoffroad) then {
 				_enableCamShake = true;
-				_camshakepower = 1 * 0.15 * speed (vehicle player);
-				_camshakefreq = 1.5 * speed (vehicle player) / 7.5;
+				_speed = speed (vehicle player);
+				_coeff = 0.02 * _speed + 0.02*(_speed ^ 2);
+				_camshakepower = offroad_wobble/100 * _coeff * 0.2;
+				_camshakefreq = 0.14 * _speed; //value = 10 for 70 kmh
 				enableCamShake true;	
-			//	addCamShake [_camshakepower, 8, _camshakefreq];	
-				addCamShake [10, 2, 10];	//no matter duration, lasts max ~2 seconds
+				addCamShake [_camshakepower, 8, _camshakefreq];	
+			//	addCamShake [10, 2, 10];	//no matter duration, lasts max ~2 seconds
 				if (offroad_debug) then {
-					hint ("off road: " + str (round (_camshakepower * 10)/10) + "|" + str (round (_camshakefreq * 10) / 10) + " on: " + surfaceType getpos player);		
+					hint ("off road: " + str (round (_camshakepower * 10)/10) + "|" + str (round (_coeff)) + " on: " + surfaceType getpos player);		
 				};	
 			} else {
 				resetCamShake;
