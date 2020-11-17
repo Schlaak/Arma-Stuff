@@ -7,9 +7,12 @@ edited by ir0nsight
  */
 if (hasInterface) then //check if running machine == player
 {	//NOTE: only running on client from here 
+	hint "offroad running";
+
 	//---------------------check for already running instances------start
-	private allowRun = player getVariable ["offRoadRunning",false];
-	if (!allowRun) exitWith { //only continue if skript isnt already running
+	private _allowRun = true;
+	//(player getVariable ["offRoadRunning",false]);
+	if (!_allowRun) exitWith { //only continue if skript isnt already running
 		debugLog "offroadSkript already running.";
 	};
 	player setVariable ["offRoadRunning",true,false]; //prevent other instances from intialising
@@ -28,12 +31,15 @@ if (hasInterface) then //check if running machine == player
 		"offroad script", //category
 		true,	//default value
 		true, 	//isglobal (same setting for everyone)
-		{hint "cba setting changed"}, //execute on change
+		{
+			missionNamespace setVariable ["skipOffroad",(!_this),false]; //update variable on player
+			hint ("cba setting changed to " + str (missionNamespace getVariable ["skipOffroad","undefined"]));
+		}, //execute on change
 		false //requires restart
 	] call CBA_fnc_addSetting;
 	//----------------------------CBA SETTINGS Init--------------END
 
-
+	_enableCamShake = false;
 	//LOOP START
 	while {!_kill} do
 	{
@@ -43,16 +49,26 @@ if (hasInterface) then //check if running machine == player
 			
 			if ( (vehicle player) isKindOf "car" ) then
 			{
-				waituntil { //TODO: suspends complete skript in loop with no timeout till condition is met.
-					!(isOnRoad (vehicle player)) && !((surfaceType getpos player) in _surfacearray) && (vehicle player != player) &&((speed (vehicle player) >= 3) OR (speed (vehicle player) < -3)) && (vehicle player) isKindOf "car" 
-				};
-				enableCamShake true;
-				_camshakepower = 0.15 * speed (vehicle player);
-				_camshakefreq = speed (vehicle player) / 7.5;
-				addCamShake [_camshakepower, 8, _camshakefreq];
+				_isoffroad = (!(isOnRoad (vehicle player)) && !((surfaceType getpos player) in _surfacearray) && (vehicle player != player) &&((speed (vehicle player) >= 3) OR (speed (vehicle player) < -3)) && (vehicle player) isKindOf "car" );
+		//		waituntil { //TODO: suspends complete skript in loop with no timeout till condition is met.
+		//			
+		//		};
+				if (_isoffroad) then {
+					_enableCamShake = true;
+					_camshakepower = 1 * 0.15 * speed (vehicle player);
+					_camshakefreq = 1.5 * speed (vehicle player) / 7.5;
+					addCamShake [_camshakepower, 0.5, _camshakefreq];					
+				}
 			};
 		};
-		sleep 2;
+		if (_enableCamShake) then {
+			hint "off road";
+			enableCamShake true;
+		} else {
+			enableCamShake false; //TODO does this conflict with other wobble mods?
+			hint "on road";
+		};
+		sleep 0.5;
 	}; //LOOP END
 };
 
