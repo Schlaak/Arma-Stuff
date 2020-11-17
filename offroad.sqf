@@ -105,14 +105,17 @@ if (hasInterface) then //check if running machine == player
 					};	
 				} else {
 					resetCamShake;
-					if (offroad_debug ) then {
+					if (offroad_debug) then {
 						hint ("on road: " + surfaceType getpos player);
 					};
 				}
 			} else {
-				enableCamShake false; //TODO does this conflict with other wobble mods?
+				//enableCamShake false; //TODO does this conflict with other wobble mods?
 			};
-			//_i = _i + 1;
+			_i = _i + 1;
+			if (offroad_debug && (_i mod 10) == 0 ) then {
+				hint ("offroad at iteration: " + str _i);
+			};
 			sleep 1;
 		}; //LOOP END
 	}; //_code end
