@@ -20,6 +20,20 @@ if (hasInterface) then //check if running machine == player
 	private _kill = false; //create breakout var
 	private _skip = false; //create ignore var. 
 	
+	//----------------------------CBA SETTINGS Init--------------START
+	[ //cba settings params
+		"offroad_enable", //display name
+		"CHECKBOX", //GUI type
+		"enable/disable offroad camera shake script", //tooltip
+		"offroad script", //category
+		true,	//default value
+		true, 	//isglobal (same setting for everyone)
+		{hint "cba setting changed"}, //execute on change
+		false //requires restart
+	] call CBA_fnc_addSetting;
+	//----------------------------CBA SETTINGS Init--------------END
+
+
 	//LOOP START
 	while {!_kill} do
 	{
