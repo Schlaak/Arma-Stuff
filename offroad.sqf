@@ -90,7 +90,7 @@ if (hasInterface) then //check if running machine == player
 			if (_isoffroad) then {
 				_enableCamShake = true;
 				_speed = speed (vehicle player);
-				_coeff = 0.02 * _speed + 0.02*(_speed ^ 2);
+				_coeff = 0.02 * _speed + 0.02*(_speed ^ 2); //value 100% for 70 kmh, 20% for 30 kmh
 				_camshakepower = offroad_wobble/100 * _coeff * 0.2;
 				_camshakefreq = 0.14 * _speed; //value = 10 for 70 kmh
 				enableCamShake true;	
