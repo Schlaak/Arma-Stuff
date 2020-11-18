@@ -6,8 +6,8 @@ creates illusion of nearby gunfight
 //--------------------------------------------------------------------------------------------
 //run code on ONE ! machine. will remotely call sounds on all clients (including server). define paramters in _handles array
 //requires an object called "center" (as its varname in editor) as the soundsource. object will not be touched or teleported.
-
-_handle = [true, 30] spawn { //[debug mode, duration]
+if (!isServer) exitWith {};
+_handle = [true, 3000] spawn { //[debug mode, duration]
 	params["_debug","_duration"];
 	IRN_calcSoundPos = {
 		params ["_center","_dist","_headPos"];
@@ -22,6 +22,7 @@ _handle = [true, 30] spawn { //[debug mode, duration]
 			_direction = _dirNorm vectorMultiply _dist;
 			_headPos = _posP vectorAdd _direction;
 		};
+		hint ("player to soundsource: " + str (getPosASL player distance _headPos));
 		_headPos
 	};
 
