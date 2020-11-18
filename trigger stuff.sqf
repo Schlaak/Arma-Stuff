@@ -1,0 +1,1 @@
+(count (allPlayers select {(vehicle _x) == auto}) == (count allPlayers - 1)) //check if all players are in given vehicle

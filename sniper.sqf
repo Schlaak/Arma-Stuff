@@ -36,14 +36,35 @@ player globalChat( "target: " + str _var);
 };
 
 //init sniper
-_handle = this spawn { 
-hint ("handle has: " + str _this); 
-sleep 30; 
-_var = missionnamespace getVariable ["target", 50];  
-_this globalChat "target acquired(?)"; 
-_this reveal [_var,4];   
-_this doFire _var;    
-_this setSkill 1; 
+//code to reveal all nato forces to sniper
+_handle = [this] spawn { 
+    params ["_sniper"];
+    _sniper globalChat ("target acquired for " + str _sniper); 
+
+    _sniper setSkill 1; 
+    while {alive _sniper} do {
+        private _closest = selectRandom (allUnits select {
+         side _x == east
+        });
+        _sniper globalChat str (allUnits select {
+         side _x == east
+        });
+        { 
+            if ((_x distance _sniper) < (_closest distance _sniper)) then {
+                _closest = _x;
+            };
+           _sniper reveal [_x,4]; 
+        
+           sleep 0.1;
+        }foreach (allUnits select {
+           side _x == east
+        });
+        _sniper doFire _closest;  
+        _sniper doTarget _closest;  
+        _sniper globalChat ("i am: " + str _sniper + "| target: " + str _closest + str side _closest);
+        sleep 2;
+    };
+    _this globalChat "i died :(";
 }
 
 
