@@ -93,7 +93,7 @@ if (hasInterface) then //check if running machine == player
 				_isoffroad = (vehicle player) isKindOf "car" && !isOnRoad player &&( abs speed (vehicle player) >= 5);
 				if (_isoffroad) then {
 					_enableCamShake = true;
-					_speed = speed (vehicle player);
+					_speed = abs (speed (vehicle player));
 					_coeff = 0.02 * _speed + 0.02*(_speed ^ 2);
 					_camshakepower = offroad_wobble/100 * _coeff * 0.2;
 					_camshakefreq = 0.14 * _speed; //value = 10 for 70 kmh
