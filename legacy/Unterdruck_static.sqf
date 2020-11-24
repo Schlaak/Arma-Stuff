@@ -1,0 +1,183 @@
+
+//=============================================================================================
+
+//Generelle Infos: Einheit wird automatisch durch script ausgetattet (ausser rucksack) und hat begrenzt Munition (kann im Gurtanzahl var iable eingestell werden). Einheit ist gedacht für stationäres MG nest im Wald bis 400 m sichtweite. Schiesst nur bei direktem Sichtkontakt, erste salve geht normalerweise in den Boden. Die einheit bewegt sich nciht und spottet bei direktem sichtkontakt den gegner instant, beschiesst auch sofort. Hört sich overpowered an, allerdings schiesst die MG einheit extrem ungezielt und als "MG nest" soll sie ja auch überwachen, das instant spotten bei sichtkontakt ist also vollkommen realisitsch (ausser für ghillies vllt). Einheit sollte nicht alleine sondern mit 2-3 weiteren standard KIs platziert werden (muss aber nicht). Kann nur auf vorplatzierte Einheiten aus dem editor angewendet werden, ZEUS unterstützung kommt vllt in der zukunft
+//befehl für einheiten init: null = [this] execVM "IRON\unterdruck_static.sqf";
+
+
+_unit = _this select 0;
+//_unit sideChat "Script gestartet, Loadout wird erstellt";
+//Stellt einheit auf "Nicht feuern", damit nicht vanilla gefeuert wird sondern nur durch geskriptetes forceWeaponFire
+//_unit setCombatMode "BLUE";
+//_unit disableAI "path";
+_unit setunitpos "down";
+_unit setSkill ["aimingAccuracy",0.5];
+_unit setSkill ["aimingshake",0.5];
+
+_Gurtlaenge = selectRandom [50,100,150,200];
+_Gurtanzahl = 10;
+
+//===========get vehicles available turrets and weapons===START
+_vehicle = vehicle _unit;
+_turretPaths = allTurrets _vehicle; //[[0],[0,0]]
+_weaponsOnVehicle = [];
+{
+	_weaponsOfTurret = _vehicle weaponsTurret _x;
+	_weaponsOnVehicle pushback [_x,_weaponsOfTurret];
+} foreach _turretpaths;
+//////hint str _weaponsOnVehicle;
+
+_gun = _weaponsOnVehicle select 0;	//uses first availabe weapon/turret (usually main gun)
+_gun = _gun select 1 select 0;	//=string of muzzle
+
+
+//===========get vehicles available turrets and weapons===END
+_reloadTime = 0.02;
+//___________________________________
+
+_SchussCounter = 0; //Zählt Schüsse um realistisches Nachladen zu ermöglichen
+_GurtCounter = 0; //Zählt Munitions Gurte um maximale Munitionsmenge festzulegen, unabhängig vom Schützeninventar
+_geladen = false;
+_zielgueltig = false;
+_ZielControl = 0;
+_magazineClass = currentMagazine _unit;
+_Schnarch = 5;
+_cosmin = 2;
+
+
+_lastDowntime = time;	//empty variable for later use
+
+
+
+while {alive _unit} do
+{
+		////hint str floor time;
+
+		_unit setunitpos "middle";
+		//_unit disableAI "path";
+		(group _unit) setVariable ["Vcm_Disable",true]; //This command will disable Vcom AI on a group entirely.
+		(group _unit)  setBehaviour "combat";
+		_unit setCombatMode "blue";
+
+		_unit setUnitRecoilCoefficient 0.1;
+
+	scopeName "main";
+	//////hint str currentwaypoint group _unit;
+/*	if (count waypoints group _unit == currentwaypoint group _unit) then	//keine aktiven waypoints
+	{
+		_unit setunitpos "middle";
+		_unit disableAI "path";
+		(group _unit) setVariable ["Vcm_Disable",true]; //This command will disable Vcom AI on a group entirely.
+		(group _unit)  setBehaviour "combat";
+		_unit setCombatMode "RED";
+	}
+	else
+	{
+		(group _unit) setVariable ["Vcm_Disable",false]; //This command will disable Vcom AI on a group entirely.
+		_unit setunitpos "up";
+		_unit enableAI "path";
+		(group _unit)  setBehaviour "aware";
+		(group _unit) setSpeedMode "full";
+		_unit setCombatMode "BLUE";
+	};
+*/
+	//////hint str (_randomDowntime > 1);
+	//_unit globalchat format ["time %1, ammo %2", floor time,_unit ammo _gun];
+	if (_unit ammo _gun > 0) then //Waffe geladen, Ziele verfügbar ? wird geprüft
+	{
+
+		//_unit sideChat "Waffe geladen, prüfe verfügbare Ziele";
+			_enemySides = [side _unit] call BIS_fnc_enemySides;
+			_radius = 800;
+			_nearEnemies = allUnits select {_x distance _unit < _radius AND side _x in _enemySides};
+			////hint format ["near Enemies: %1, time %2",_nearEnemies,floor time];
+			_ZielControl = count _nearEnemies;
+			//_unit sideChat format ["%1",_ZielControl];
+			if (_ZielControl >= 1) then //Kontrolliert ob Ziele gefunden wurden, nur dann wird _Ziel ausgewählt
+			{
+				_Schnarch = 0.2;
+				_Ziel = "";	//empty target
+				{	//check visibilty for all Targets until one returns true
+					_ziel = _x;
+					//_unit globalChat format ["checking unit %1, time %2",_x,floor time];
+					_vecTar = getPosASL _Ziel vectorDiff getPosASL _unit;
+					_weaponVectorDir = _unit weaponDirection _gun;
+					_cos = acos (_vecTar vectorCos _weaponVectorDir);
+					_vector = [_unit, _Ziel] call BIS_fnc_dirTo;
+					_cansee = [_unit, "GEOM"] checkVisibility [eyePos _unit, eyePos _ziel];
+
+					_insSurface = lineIntersectssurfaces [eyepos _unit, eyePos _Ziel, _unit, _Ziel, false,1,"VIEW","FIRE",true];//gibt aus: Oberflächen die zwischen _Ziel und Schütze sind
+					_countINSSurface = count _insSurface; //ist > 0 wenn Oberflächen zwischen Schütze und _Ziel
+					_distance = _unit distance _ziel;
+					_randomDist = random [100,200,400] / _distance;
+					//_unit globalChat format ["Sichtbarkeit: %1, Entfernung: %2, Oberflächen: %3, Zufall: %4",_cansee, _distance, _countINSSurface,_randomDist];
+					if (_ziel isKindOf "helicopter") then {_cosMin = 15;} else {_cosMin = 5};
+
+					if (_cansee > 0.1 && _cos < _cosMin && _countINSSurface < 1 && (_randomDist >= 0.5)) exitwith //Sichtkontakt besteht, Feuer wird ausgelöst
+					{
+						_unit reveal _Ziel;
+						_unit doWatch (getpos _ziel);
+						_unit doTarget _ziel;
+
+						//Schiessbefehl
+						_bursts = selectRandom [3];
+						_handle = _unit doFIre _Ziel;
+						//_unit globalChat format ["firing at %1, time %2",_ziel, floor time];
+						for "_i" from 0 to _bursts do
+						{
+							_burstLength = selectRandom [10];
+							for "_i" from 0 to _burstLength do //wird pro gelöstem Schuss einmal durchgeführt
+							{
+								scopeName "Schuss";
+								_vecTar = getPosASL _Ziel vectorDiff getPosASL _unit;
+								_weaponVectorDir = _unit weaponDirection currentWeapon _unit;
+								_cos = acos (_vecTar vectorCos _weaponVectorDir);
+								_vector = [_unit, _Ziel] call BIS_fnc_dirTo;
+								_cansee = [objNull, "VIEW"] checkVisibility [eyePos _unit, eyePos _ziel];
+								_unit doTarget _ziel;
+
+									_currentWeapon = currentWeapon _unit;
+									_weaponModes = getArray (configFile/"CfgWeapons"/_currentWeapon/"modes");
+									_desiredWeapon = _weaponModes select 0;
+
+									[_unit, _gun] call BIS_fnc_fire;
+									sleep _reloadTime;
+									_SchussCounter = _SchussCounter +1;
+									//_unit sideChat format ["%1",_SchussCounter];
+									_count = _unit ammo primaryWeapon _unit;
+									//////hint str _count;
+
+							};
+							sleep 0.3;
+						};
+					};
+					sleep 0.1;
+				} forEach _nearEnemies;
+				sleep 1;
+				//_unit globalChat format ["no targets were visible time %1",floor time];
+				//__________________________________
+
+			}
+			else	//no targets found nearby
+			{
+				_Schnarch = 5;
+			};
+			////hint str "searching";
+	}
+	else //Nachladescript -> lädt nach
+	{
+		_unit setCombatMode "BLUE";
+		sleep 1;
+		//_unit say3D "russian1";
+		//_unit sideChat "MG lädt, Gurt:";
+		//_unit sideChat format ["%1",_GurtCounter];
+		_unit addItemToBackpack _magazineClass;
+		_unit addItemToVest _magazineClass;
+		reload _unit;
+		sleep 3;
+		_unit setVehicleAmmo 1; //ammo in mag gets instantly set to full
+	};
+sleep _Schnarch;
+_unit setVehicleAmmo 1;
+};
+sleep 1;
