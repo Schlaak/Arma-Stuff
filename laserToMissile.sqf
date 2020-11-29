@@ -13,6 +13,6 @@ systemChat "CRUISE MISSILE INBOUND...KEEP LASER ON TARGET!!!";
 west reportRemoteTarget [_laser, 3600];  
 _laser confirmSensorTarget [west, true];  
 if (isNil "VLS") exitWith {systemChat "no vertical launch system found."};
-if (isNull "VLS") exitWith {systemChat "no vertical launch system found."};
+if (isNull VLS) exitWith {systemChat "no vertical launch system found."};
 
 0 = VLS fireAtTarget [_laser, "weapon_vls_01"]; 
