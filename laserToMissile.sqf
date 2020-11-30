@@ -2,7 +2,7 @@
 		//Info: this code only works in singleplayer as it uses local variables as "player".
 	playSound3D ["A3\dubbing_f\modules\supports\artillery_request.ogg", player];
 	sleep 5;
-	//Detecting if player has laser
+	//gets the lasered target of current vehicle: player, players vehicle or even remotecontrolled UAVs
 	_laser = laserTarget cameraOn;
 
 	If (isNull _laser) exitWith {systemChat "use laser designator"};
