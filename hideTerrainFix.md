@@ -12,7 +12,8 @@ This means a tank that is placed over a hidden house will spawn before the house
 - mod running permanently suspending all objects until module execution
 Problem: theres a reason that execution order first spawns vehicles and then runs modules. often modules require the objects to run.
 - mod running only through creator commision for certain objects
-  -Advantage: Selectively exclude some vehicles that could collide for spawning directly
-  -Drawback: creator needs to know what hes doing
-  -Suggestion: An editor placeable module that is synched with a vehicle or mission layer and suspends their creations 
+  - Advantage: Selectively exclude some vehicles that could collide for spawning directly
+  - Drawback: creator needs to know what hes doing
+  - Suggestion: An editor placeable module that is synched with a vehicle or mission layer and suspends their creations 
+  
  
