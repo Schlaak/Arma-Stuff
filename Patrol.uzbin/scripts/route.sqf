@@ -300,3 +300,5 @@ switch (_LambsTskZuweisung3) do
 		[(leader hostilesgrp3), 1500] spawn lambs_wp_fnc_taskCreep;
 	};
 };
+
+//Randgruppennotiz
