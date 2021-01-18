@@ -1,0 +1,27 @@
+is there a "group spawned" or "unit spawned" eventhandler ?
+xeh included
+Grezvany13heute um 13:28 Uhr
+spawned by what?
+3den, Zeus, scripted, magic?
+because the first 2 have EH's, the third one... you can do yourself and the last one doesn't exist
+IR0NSIGHTheute um 13:40 Uhr
+ideally any of them. dont really need them for scripted, but Zeus is what i wanna catch
+Leopard20heute um 13:42 Uhr
+Dunno. But I know that the alternative syntax works.
+You can try that too. If it returns an empty string as well, check your code, otherwise make a ticket on FT.
+Leopard20heute um 13:44 Uhr
+I think you simply need the  init. 
+The syntax was something like :
+[class, "init", code] call CBA_fnc_addClassEventHandler
+Not sure
+Also not sure about a group version
+Grezvany13heute um 13:45 Uhr
+https://community.bistudio.com/wiki/Arma_3:_Event_Handlers#CuratorObjectPlaced
+will trigger for all objects (and for each object in a group) when spawned by Zeus
+
+//TODO: 
+create eventhandler that catches all spawned units
+- zeus spawned
+- eden spawned
+- script spawned
+//have init that adds EH 
