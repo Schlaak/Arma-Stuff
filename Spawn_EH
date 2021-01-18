@@ -18,3 +18,10 @@ Also not sure about a group version
 Grezvany13heute um 13:45 Uhr
 https://community.bistudio.com/wiki/Arma_3:_Event_Handlers#CuratorObjectPlaced
 will trigger for all objects (and for each object in a group) when spawned by Zeus
+
+//TODO: 
+create eventhandler that catches all spawned units
+- zeus spawned
+- eden spawned
+- script spawned
+//have init that adds EH 
