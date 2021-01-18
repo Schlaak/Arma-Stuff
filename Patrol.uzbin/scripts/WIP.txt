@@ -1,0 +1,4 @@
+Position über routenmarker + random Befehl getpos []
+
+Find position 100 metres and 45 degrees from player position:
+player getPos [100, 45];
